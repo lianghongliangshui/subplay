@@ -16,3 +16,10 @@ export enum SessionStatus {
   PLAYING = 'PLAYING',   // Audio is playing
   WAITING = 'WAITING',   // 5-second pause
 }
+
+export interface AISettings {
+  provider: 'gemini' | 'deepseek';
+  deepseekApiKey?: string;
+  deepseekBaseUrl?: string;
+  deepseekModel?: string;
+}

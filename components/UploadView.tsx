@@ -1,17 +1,21 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from './Button';
 import { parseSRT } from '../services/srtParser';
-import { Subtitle } from '../types';
+import { Subtitle, AISettings } from '../types';
+import { SettingsModal } from './SettingsModal';
 
 interface UploadViewProps {
-  onStart: (audioFile: File, subtitles: Subtitle[]) => void;
+  onStart: (audioFile: File, subtitles: Subtitle[], settings: AISettings) => void;
+  initialSettings: AISettings;
+  onSettingsChange: (settings: AISettings) => void;
 }
 
-export const UploadView: React.FC<UploadViewProps> = ({ onStart }) => {
+export const UploadView: React.FC<UploadViewProps> = ({ onStart, initialSettings, onSettingsChange }) => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [subtitles, setSubtitles] = useState<Subtitle[]>([]);
   const [srtFileName, setSrtFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleAudioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -45,14 +49,27 @@ export const UploadView: React.FC<UploadViewProps> = ({ onStart }) => {
 
   const handleStart = () => {
     if (audioFile && subtitles.length > 0) {
-      onStart(audioFile, subtitles);
+      onStart(audioFile, subtitles, initialSettings);
     } else {
       setError("Please upload both an MP3 and a valid SRT file.");
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 max-w-2xl mx-auto w-full">
+    <div className="flex flex-col items-center justify-center min-h-screen p-6 max-w-2xl mx-auto w-full relative">
+      <div className="absolute top-6 right-6">
+        <button 
+          onClick={() => setIsSettingsOpen(true)}
+          className="bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white p-2.5 rounded-full transition-all border border-slate-700"
+          title="AI Settings"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.39a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+      </div>
+
       <div className="text-center mb-12">
         <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400 mb-4">
           LinguaLoop AI
@@ -125,6 +142,13 @@ export const UploadView: React.FC<UploadViewProps> = ({ onStart }) => {
           </div>
         </div>
       </div>
+
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)}
+        settings={initialSettings}
+        onSave={onSettingsChange}
+      />
     </div>
   );
 };
